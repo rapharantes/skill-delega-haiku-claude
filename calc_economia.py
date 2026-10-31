@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Modelo de custo da skill delega-haiku: o principal (Opus 5.5) faz direto ou delega.
+"""Modelo de custo da skill delegar-haiku: o principal (Opus 5.5) faz direto ou delega.
 
 Precos em US$ por milhao de tokens, tirados de
 https://platform.claude.com/docs/en/about-claude/pricing em 31/10/2026.

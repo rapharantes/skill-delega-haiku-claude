@@ -1,6 +1,6 @@
 # skill-delega-haiku-claude
 
-`delega-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
+`delegar-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
 
 No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório estima 89% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. Em tarefa pequena, como escrever 5 títulos, delegar sai 2,6 vezes mais caro, e a skill manda o principal fazer direto.
 
@@ -32,13 +32,13 @@ Subagente nunca executa ação irreversível: alterar campanha, enviar mensagem,
 
 ## Instalação
 
-No app Claude (claude.ai): baixe o `delega-haiku.zip` deste repositório, abra Customize > Skills, clique em "+", depois em "Create skill" > "Upload a skill", e envie o zip. A execução de código precisa estar ligada ("Code execution and file creation", ou "Create and edit files" no layout novo, em Settings > Capabilities). Passo a passo oficial: [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
+No app Claude (claude.ai): baixe o `delegar-haiku.zip` deste repositório, abra Customize > Skills, clique em "+", depois em "Create skill" > "Upload a skill", e envie o zip. A execução de código precisa estar ligada ("Code execution and file creation", ou "Create and edit files" no layout novo, em Settings > Capabilities). Passo a passo oficial: [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
 
-No Claude Code: copie a pasta `delega-haiku/` para `~/.claude/skills/` (vale para todos os seus projetos) ou para `.claude/skills/` dentro de um projeto. Documentação: [Extend Claude with skills](https://code.claude.com/docs/en/skills).
+No Claude Code: copie a pasta `delegar-haiku/` para `~/.claude/skills/` (vale para todos os seus projetos) ou para `.claude/skills/` dentro de um projeto. Documentação: [Extend Claude with skills](https://code.claude.com/docs/en/skills).
 
 A skill depende da ferramenta de subagentes (Agent) com escolha de modelo. Onde ela não existe, não há como delegar e o principal faz tudo direto.
 
-Para usar, peça em linguagem normal: "delegue isso a subagentes", "use multiagentes nessa análise". No Claude Code também dá para chamar com `/delega-haiku`.
+Para usar, peça em linguagem normal: "delegue isso a subagentes", "use multiagentes nessa análise". No Claude Code também dá para chamar com `/delegar-haiku`.
 
 ## Quanto ela economiza
 
@@ -126,8 +126,8 @@ Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releit
 
 ## Arquivos
 
-- `delega-haiku/SKILL.md`: a skill.
-- `delega-haiku.zip`: a mesma pasta compactada, pronta para enviar no app.
+- `delegar-haiku/SKILL.md`: a skill.
+- `delegar-haiku.zip`: a mesma pasta compactada, pronta para enviar no app.
 - `calc_economia.py`: o modelo de custo, só com a biblioteca padrão do Python.
 
 ## Licença

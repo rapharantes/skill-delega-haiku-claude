@@ -1,5 +1,5 @@
 ---
-name: delega-haiku
+name: delegar-haiku
 description: Divide tarefa grande, delega o volumoso a subagentes Haiku/Sonnet em paralelo, revisa, corrige e integra. Use quando pedirem para delegar a subagentes, usar multiagentes ou poupar tokens com eles.
 ---
 
