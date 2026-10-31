@@ -134,4 +134,4 @@ Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releit
 
 MIT. Pode usar, copiar e adaptar.
 
-Feito por Rapha Arantes ([@rapharantes](https://github.com/rapharantes)).
+Feito por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes)
