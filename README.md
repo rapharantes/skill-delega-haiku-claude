@@ -4,6 +4,8 @@
 
 No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório estima 89% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. Em tarefa pequena, como escrever 5 títulos, delegar sai 2,6 vezes mais caro, e a skill manda o principal fazer direto.
 
+Usa Codex, Cursor, Antigravity ou Gemini CLI? A versão para essas ferramentas é a [delegar-subagentes](https://github.com/rapharantes/delegar-subagentes).
+
 ## O que ela faz
 
 A skill entra quando você pede para delegar a subagentes, usar multiagentes ou poupar tokens com eles. Antes de delegar, o principal passa por uma escada e para no primeiro degrau que resolve:
