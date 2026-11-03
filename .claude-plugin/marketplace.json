@@ -1,0 +1,22 @@
+{
+  "name": "rapharantes",
+  "description": "Skills gratuitas de Raphael Arantes para o Claude Code",
+  "owner": {
+    "name": "Raphael Arantes",
+    "url": "https://www.linkedin.com/in/raphael-arantes/"
+  },
+  "plugins": [
+    {
+      "name": "delegar-haiku",
+      "source": "./",
+      "description": "Divide tarefa grande, delega o volumoso a subagentes Haiku/Sonnet em paralelo, revisa, corrige e integra.",
+      "author": {
+        "name": "Raphael Arantes",
+        "url": "https://www.linkedin.com/in/raphael-arantes/"
+      },
+      "homepage": "https://github.com/rapharantes/skill-delega-haiku-claude",
+      "license": "MIT",
+      "skills": ["./delegar-haiku"]
+    }
+  ]
+}
