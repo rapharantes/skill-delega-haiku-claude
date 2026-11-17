@@ -2,7 +2,7 @@
 
 `delegar-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
 
-No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório estima 89% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. Em tarefa pequena, como escrever 5 títulos, delegar sai 2,6 vezes mais caro, e a skill manda o principal fazer direto.
+No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório, calibrado com a partida medida de um subagente, estima 79% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. Em tarefa pequena, como escrever 5 títulos, delegar sai 3 vezes mais caro, e a skill manda o principal fazer direto.
 
 Usa Codex, Cursor, Antigravity ou Gemini CLI? A versão para essas ferramentas é a [delegar-subagentes](https://github.com/rapharantes/delegar-subagentes).
 
@@ -16,6 +16,8 @@ A skill entra quando você pede para delegar a subagentes, usar multiagentes ou 
 4. Só o volume vai para subagentes: muito material para ler, ou blocos independentes que podem rodar ao mesmo tempo.
 
 O Haiku extrai dados, lê e resume arquivos, pesquisa na web, checa contra checklist e escreve variações de texto em lote. O Sonnet entra em código com especificação e teste quando há volume, e nas tarefas em que o Haiku errou mesmo depois de corrigido. O principal (Opus ou maior) planeja, revisa e integra. Em extração, leitura e pesquisa com o Haiku 5.5, o subagente roda com esforço baixo.
+
+Para gastar menos, o briefing limita rodadas, porque cada rodada relê o contexto inteiro do subagente, e leitura de arquivos locais vai para o Explore, que parte mais leve. Quando o principal tem trabalho próprio, subagentes do mesmo tipo saem escalonados para reaproveitar o cache da partida.
 
 Quando uma skill instalada muda o resultado de uma subtarefa (`xlsx` para planilha, por exemplo), o principal manda o subagente carregá-la antes de começar. É no máximo uma por subagente, porque a skill entra inteira no contexto dele. Numa checagem, o checklist da própria skill substitui o que o principal teria de escrever no briefing. Skills que delegam ou que montam o entregável final ficam com o principal.
 
@@ -63,7 +65,19 @@ Para usar, peça em linguagem normal: "delegue isso a subagentes", "use multiage
 
 ## Quanto ela economiza
 
-Isto é um modelo de custo, não um benchmark. A única medição real veio da criação da skill: um subagente com uma chamada de ferramenta processou cerca de 100 mil tokens de Haiku. O resto sai do `calc_economia.py`, que usa os preços oficiais da API consultados em 31/10/2026 e as premissas abaixo. Rode o script com os seus números.
+Isto é um modelo de custo, não um benchmark. A partida do subagente vem de medição; o resto sai do `calc_economia.py`, que usa os preços oficiais da API consultados em 31/10/2026 e as premissas abaixo. Rode o script com os seus números.
+
+### O que foi medido
+
+Em nov/2026, num ambiente com cerca de 15 conectores ligados, lendo o uso de tokens de cada requisição nas transcrições dos subagentes:
+
+- Um subagente general-purpose parte de 92 mil tokens antes de fazer qualquer coisa: prompt de sistema, ferramentas e instruções dos conectores. O Explore, com menos ferramentas e sem CLAUDE.md, parte de 79 mil.
+- Mesmo sem usar ferramenta, o subagente faz duas requisições.
+- Cada rodada relê o contexto inteiro. Um Haiku de pesquisa com 7 chamadas de ferramenta em 4 rodadas processou 460 mil tokens e custou US$ 0,055. A contagem que o Claude mostra ao fim do subagente (126 mil, nesse caso) é o tamanho final do contexto, não o total.
+- Subagentes do mesmo tipo disparados juntos pagam, cada um, a partida inteira. Disparado depois que o primeiro terminou, o segundo leu a partida do cache: no general-purpose, a partida inteira, e o subagente custou um sexto (US$ 0,002 contra US$ 0,013); no Explore, cerca de metade da partida.
+- Dois Haiku de pesquisa em paralelo terminaram em 36 segundos no total.
+
+A versão anterior deste README supunha partida de 50 mil tokens, porque lia a contagem final como total. Com a partida medida, a economia na leitura pesada caiu cerca de 10 pontos e o código com Sonnet num módulo só passou a dar prejuízo.
 
 ### Preços usados (US$ por milhão de tokens)
 
@@ -79,7 +93,7 @@ Fonte: [preços da Claude API](https://platform.claude.com/docs/en/about-claude/
 ### Premissas
 
 - O principal é o Opus 5.5 e relê C = 60 mil tokens de contexto a cada turno (prompt de sistema, ferramentas e conversa).
-- Um subagente parte de S = 50 mil tokens. É o valor que reproduz a medição de ~100 mil tokens em duas requisições; o script confere isso com um assert.
+- Um subagente parte de S = 92 mil tokens, o valor medido; o script confere com um assert que o modelo reproduz a medição.
 - Tudo que entra no contexto do principal é relido nos K = 20 turnos seguintes da sessão, a preço de leitura de cache. Quando o subagente lê no lugar do principal, essa releitura some.
 - Briefing de 400 tokens por subagente e 80 tokens de saída por chamada de ferramenta.
 - Tempo é contado em turnos em série, com a mesma duração por turno para todos os modelos. Se o Haiku responder mais rápido no seu uso, o ganho de tempo é maior que o mostrado.
@@ -90,35 +104,35 @@ Economia negativa quer dizer que delegar custou mais.
 
 | Caso | Custo direto | Custo delegado | Economia | Tokens no principal (direto → delegado) | Tokens nos subagentes | Turnos em série (direto → delegado) |
 |---|---|---|---|---|---|---|
-| 5 títulos de anúncio | US$ 0,016 | US$ 0,043 | -165% | 63 mil → 132 mil | 51 mil | 1 → 3 |
-| 60 variações de anúncio, com checagem de tamanho | US$ 0,096 | US$ 0,062 | +35% | 228 mil → 169 mil | 156 mil | 3 → 5 |
-| Métricas de 3 contas de anúncio (30 mil tokens cada) | US$ 1,023 | US$ 0,112 | +89% | 2.869 mil → 184 mil | 789 mil | 10 → 6 |
-| Pesquisa web lendo 8 páginas, 1 subagente | US$ 0,831 | US$ 0,085 | +90% | 2.502 mil → 135 mil | 1.079 mil | 13 → 15 |
-| Pesquisa web lendo 8 páginas, 2 subagentes | US$ 0,831 | US$ 0,082 | +90% | 2.502 mil → 150 mil | 935 mil | 13 → 9 |
-| Ler 12 arquivos de código e responder | US$ 0,670 | US$ 0,060 | +91% | 2.078 mil → 135 mil | 975 mil | 13 → 15 |
-| Implementar módulo com teste (Sonnet) | US$ 0,528 | US$ 0,433 | +18% | 1.317 mil → 398 mil | 676 mil | 11 → 15 |
+| 5 títulos de anúncio | US$ 0,016 | US$ 0,049 | -197% | 63 mil → 132 mil | 93 mil | 1 → 3 |
+| 60 variações de anúncio, com checagem de tamanho | US$ 0,096 | US$ 0,068 | +29% | 228 mil → 169 mil | 282 mil | 3 → 5 |
+| Métricas de 3 contas de anúncio (30 mil tokens cada) | US$ 1,023 | US$ 0,218 | +79% | 2.869 mil → 184 mil | 1.293 mil | 10 → 6 |
+| Pesquisa web lendo 8 páginas, 1 subagente | US$ 0,831 | US$ 0,160 | +81% | 2.502 mil → 135 mil | 1.625 mil | 13 → 15 |
+| Pesquisa web lendo 8 páginas, 2 subagentes | US$ 0,831 | US$ 0,170 | +80% | 2.502 mil → 150 mil | 1.523 mil | 13 → 9 |
+| Ler 12 arquivos de código e responder | US$ 0,670 | US$ 0,146 | +78% | 2.078 mil → 135 mil | 1.521 mil | 13 → 15 |
+| Implementar módulo com teste (Sonnet) | US$ 0,528 | US$ 0,580 | -10% | 1.317 mil → 398 mil | 1.138 mil | 11 → 15 |
 
 O que a tabela mostra:
 
-- Ler material pesado é onde a skill ganha: de 89% a 91% menos custo em contas de anúncio, pesquisa web e leitura de código. O material vai para um modelo 40 vezes mais barato na entrada e deixa de ser relido no contexto do principal.
-- O total de tokens nem sempre cai. Nos 5 títulos ele sobe de 63 mil para 183 mil. Nos casos de leitura pesada ele cai, porque some a releitura do material pelo principal. A economia é de custo, não de contagem de tokens.
+- Ler material pesado é onde a skill ganha: de 78% a 81% menos custo em contas de anúncio, pesquisa web e leitura de código. O material vai para um modelo bem mais barato e deixa de ser relido no contexto do principal.
+- O total de tokens nem sempre cai. Nos 5 títulos ele sobe de 63 mil para 225 mil. Nos casos de leitura pesada ele cai, porque some a releitura do material pelo principal. A economia é de custo, não de contagem de tokens.
 - Velocidade vem do paralelismo. Com três subagentes nas contas de anúncio, 10 turnos em série viram 6. Um subagente sozinho soma dois turnos (despacho e integração).
-- Código com Sonnet economiza pouco num módulo só (18%) e demora mais. Compensa com vários módulos em paralelo.
-- Na pesquisa grande, dois subagentes custam o mesmo que um (US$ 0,082 contra US$ 0,085) e terminam antes, porque o Haiku 5.5 cobra 5 vezes mais por token quando o prompt passa de 100 mil.
+- Código com Sonnet num módulo só sai 10% mais caro que fazer direto, e demora mais. Só compensa com vários módulos em paralelo.
+- Com partida de 92 mil, quase todo subagente que lê material passa de 100 mil tokens de prompt, onde o Haiku 5.5 cobra 5 vezes mais. Dividir a pesquisa em dois subagentes não evita isso: custa um pouco mais que um (US$ 0,170 contra US$ 0,160), mas termina antes.
 
 ### Com premissas piores
 
-| Caso | Base (C=60 mil, K=20, S=50 mil) | Sem releitura posterior (K=0) | Pessimista (C=20 mil, K=0, S=100 mil) |
+| Caso | Base (C=60 mil, K=20, S=92 mil) | Sem releitura posterior (K=0) | Pessimista (C=20 mil, K=0, S=120 mil) |
 |---|---|---|---|
-| 5 títulos de anúncio | -165% | -161% | -956% |
-| 60 variações de anúncio, com checagem de tamanho | +35% | +39% | -76% |
-| Métricas de 3 contas de anúncio | +89% | +85% | +40% |
-| Pesquisa web lendo 8 páginas, 1 subagente | +90% | +86% | +56% |
-| Pesquisa web lendo 8 páginas, 2 subagentes | +90% | +87% | +42% |
-| Ler 12 arquivos de código e responder | +91% | +88% | +49% |
-| Implementar módulo com teste (Sonnet) | +18% | +4% | -64% |
+| 5 títulos de anúncio | -197% | -194% | -1118% |
+| 60 variações de anúncio, com checagem de tamanho | +29% | +32% | -99% |
+| Métricas de 3 contas de anúncio | +79% | +69% | +32% |
+| Pesquisa web lendo 8 páginas, 1 subagente | +81% | +72% | +51% |
+| Pesquisa web lendo 8 páginas, 2 subagentes | +80% | +71% | +34% |
+| Ler 12 arquivos de código e responder | +78% | +70% | +42% |
+| Implementar módulo com teste (Sonnet) | -10% | -31% | -85% |
 
-O caso pessimista junta um ambiente leve (o principal relê só 20 mil tokens por turno), sessão que acaba logo depois da tarefa e subagente que parte de 100 mil tokens. Mesmo assim a leitura pesada economiza de 40% a 56%. Lote de texto e código com Sonnet passam a custar mais que fazer direto.
+O caso pessimista junta um principal leve (relê só 20 mil tokens por turno), sessão que acaba logo depois da tarefa e subagente que parte de 120 mil tokens. Mesmo assim a leitura pesada economiza de 32% a 51%. Lote de texto e código com Sonnet passam a custar mais que fazer direto.
 
 ### A partir de quanto material delegar compensa
 
@@ -126,16 +140,16 @@ Volume mínimo de material para delegar a um Haiku sair mais barato que o princi
 
 | Chamadas de ferramenta | Base | Sem releitura posterior (K=0) | Pessimista |
 |---|---|---|---|
-| 1 | 2 mil tokens | 4 mil tokens | 18 mil tokens |
-| 2 | 1 mil tokens | 1 mil tokens | 18 mil tokens |
-| 3 | já compensa | já compensa | 17 mil tokens |
-| 8 | já compensa | já compensa | 15 mil tokens |
+| 1 | 3 mil tokens | 5 mil tokens | 21 mil tokens |
+| 2 | 2 mil tokens | 2 mil tokens | 21 mil tokens |
+| 3 | já compensa | já compensa | 20 mil tokens |
+| 8 | já compensa | já compensa | 19 mil tokens |
 
-Com as premissas base, a partir de 3 chamadas de ferramenta delegar já sai mais barato mesmo com pouco material, porque cada turno do principal relê 60 mil tokens. No caso pessimista o ponto de virada fica entre 15 mil e 18 mil tokens. A skill usa esses números no degrau 2 da escada: abaixo de ~5 mil tokens de material, ou ~20 mil num ambiente leve, o principal faz direto.
+Com as premissas base, a partir de 3 chamadas de ferramenta delegar já sai mais barato mesmo com pouco material, porque cada turno do principal relê 60 mil tokens. No caso pessimista o ponto de virada fica perto de 20 mil tokens. A skill usa esses números no degrau 2 da escada: abaixo de ~5 mil tokens de material, ou ~20 mil num ambiente leve, o principal faz direto.
 
 ### Quanto custa errar
 
-Uma rodada de CORRIGIR no caso das 3 contas custa US$ 0,031. Se um subagente erra duas vezes e o principal assume a parte dele, o total fica em 46% do custo de fazer tudo direto. Se os três erram, fica em 120%. O teto de uma rodada de correção limita o prejuízo a cerca de 20% acima do direto.
+Uma rodada de CORRIGIR no caso das 3 contas custa US$ 0,037. Se um subagente erra duas vezes e o principal assume a parte dele, o total fica em 57% do custo de fazer tudo direto. Se os três erram, fica em 132%. O teto de uma rodada de correção limita o prejuízo a cerca de um terço acima do direto.
 
 ## Como recalcular
 
@@ -143,7 +157,7 @@ Uma rodada de CORRIGIR no caso das 3 contas custa US$ 0,031. Se um subagente err
 python3 calc_economia.py
 ```
 
-Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releitura) e `CENARIOS` com os seus casos. Os preços ficam em `PRECO`. Para medir a partida do subagente no seu ambiente, delegue uma tarefa curta e veja quantos tokens ele gastou; o Claude Code mostra essa contagem ao fim de cada subagente.
+Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releitura) e `CENARIOS` com os seus casos. Os preços ficam em `PRECO`. Para medir a partida do subagente no seu ambiente, delegue uma tarefa que não usa ferramenta ("responda ok"): a contagem que o Claude Code mostra ao fim desse subagente é a partida. Num subagente que usa ferramentas, essa contagem é só o contexto final, não o total gasto.
 
 ## Arquivos
 

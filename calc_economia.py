@@ -16,7 +16,7 @@ PRECO = {
 
 PREMISSAS = {
     "C": 60_000,  # contexto que o principal rele a cada turno (sistema, ferramentas, conversa)
-    "S": 50_000,  # contexto de partida de um subagente
+    "S": 92_000,  # contexto de partida de um subagente (medido em nov/2026, ~15 conectores ligados)
     "K": 20,  # turnos que o principal ainda roda depois; o que entrou no contexto e relido em cada um
     "B": 400,  # briefing por subagente (saida do principal)
     "c": 80,  # saida de uma chamada de ferramenta
@@ -125,9 +125,9 @@ def com(alteracoes, funcao, *args):
 
 
 VARIANTES = {
-    "Base (C=60 mil, K=20, S=50 mil)": {},
+    "Base (C=60 mil, K=20, S=92 mil)": {},
     "Sem permanencia (K=0)": {"K": 0},
-    "Pessimista (C=20 mil, K=0, S=100 mil)": {"C": 20_000, "K": 0, "S": 100_000},
+    "Pessimista (C=20 mil, K=0, S=120 mil)": {"C": 20_000, "K": 0, "S": 120_000},
 }
 
 
@@ -140,9 +140,11 @@ def mil(x):
 
 
 if __name__ == "__main__":
-    # Verificacao: o modelo reproduz a medicao real (subagente com 1 chamada ~ 100 mil tokens)
-    _, tok, _ = agente("haiku", PREMISSAS["S"] + PREMISSAS["B"], False, [0, 200], [80, 300])
-    assert 95_000 <= tok <= 105_000, tok
+    # Verificacao: o modelo reproduz a medicao real. Lendo a transcricao, a 1a requisicao de um
+    # subagente sem ferramentas tinha 91.974 tokens de contexto. A contagem que o Claude mostra
+    # ao fim do subagente e o contexto final, nao a soma das requisicoes.
+    _, _, ctx = agente("haiku", PREMISSAS["S"], False, [0], [270])
+    assert 90_000 <= ctx <= 95_000, ctx
     assert delegado(CENARIOS[0])["custo"] > direto(CENARIOS[0])["custo"]  # tarefa pequena: direto
 
     print("| Cenario | Custo direto | Custo delegado | Economia | Tokens no principal (direto -> delegado) "
