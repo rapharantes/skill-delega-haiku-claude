@@ -2,7 +2,7 @@
 
 `delegar-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
 
-No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório, calibrado com a partida medida de um subagente, estima 79% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. Em tarefa pequena, como escrever 5 títulos, delegar sai 3 vezes mais caro, e a skill manda o principal fazer direto.
+No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório, calibrado com a partida medida de um subagente, estima 79% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. No Claude Code, com o agente enxuto `executor-haiku`, a estimativa sobe para 91%. Em tarefa pequena, como escrever 5 títulos, delegar sai 3 vezes mais caro, e a skill manda o principal fazer direto.
 
 Usa Codex, Cursor, Antigravity ou Gemini CLI? A versão para essas ferramentas é a [delegar-subagentes](https://github.com/rapharantes/delegar-subagentes).
 
@@ -57,7 +57,7 @@ No app Claude (claude.ai): baixe o `delegar-haiku.zip` deste repositório, abra 
 
 No Claude Code sem plugin: copie a pasta `delegar-haiku/` para `~/.claude/skills/` (vale para todos os seus projetos) ou para `.claude/skills/` dentro de um projeto. Documentação: [Extend Claude with skills](https://code.claude.com/docs/en/skills).
 
-Opcional, no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/executor-haiku.md`. O arquivo está na seção "No Claude Code: agente enxuto" da skill. Ele fixa modelo e esforço, parte sem o CLAUDE.md, tem teto de turnos e uma lista fechada de ferramentas, que deixa de fora as ferramentas de escrita dos MCPs.
+Recomendado no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/executor-haiku.md`. O arquivo está na seção "No Claude Code: agente enxuto" da skill. Ele fixa modelo e esforço, parte sem o CLAUDE.md, tem teto de turnos e uma lista fechada de ferramentas, que deixa de fora as ferramentas de escrita dos MCPs. Na medição, partiu de 8 mil tokens, contra 55 mil do general-purpose. Subtarefa que precisa de skill ou de conector vai para o general-purpose, a menos que você acrescente essas ferramentas ao executor.
 
 A skill depende da ferramenta de subagentes (Agent) com escolha de modelo. Onde ela não existe, não há como delegar e o principal faz tudo direto.
 
@@ -72,7 +72,8 @@ Isto é um modelo de custo, não um benchmark. A partida do subagente vem de med
 Em nov/2026, num ambiente com cerca de 15 conectores ligados, lendo o uso de tokens de cada requisição nas transcrições dos subagentes:
 
 - Um subagente general-purpose parte de 92 mil tokens antes de fazer qualquer coisa: prompt de sistema, ferramentas e instruções dos conectores. O Explore, com menos ferramentas e sem CLAUDE.md, parte de 79 mil.
-- Mesmo sem usar ferramenta, o subagente faz duas requisições.
+- No Claude Code no Windows, com 5 servidores MCP ligados, o general-purpose partiu de 55 mil tokens e o agente enxuto `executor-haiku` de 8 mil, 85% menos.
+- No app, mesmo sem usar ferramenta, o subagente faz duas requisições; no Claude Code, uma.
 - Cada rodada relê o contexto inteiro. Um Haiku de pesquisa com 7 chamadas de ferramenta em 4 rodadas processou 460 mil tokens e custou US$ 0,055. A contagem que o Claude mostra ao fim do subagente (126 mil, nesse caso) é o tamanho final do contexto, não o total.
 - Subagentes do mesmo tipo disparados juntos pagam, cada um, a partida inteira. Disparado depois que o primeiro terminou, o segundo leu a partida do cache: no general-purpose, a partida inteira, e o subagente custou um sexto (US$ 0,002 contra US$ 0,013); no Explore, cerca de metade da partida.
 - Dois Haiku de pesquisa em paralelo terminaram em 36 segundos no total.
@@ -120,32 +121,34 @@ O que a tabela mostra:
 - Código com Sonnet num módulo só sai 10% mais caro que fazer direto, e demora mais. Só compensa com vários módulos em paralelo.
 - Com partida de 92 mil, quase todo subagente que lê material passa de 100 mil tokens de prompt, onde o Haiku 5.5 cobra 5 vezes mais. Dividir a pesquisa em dois subagentes não evita isso: custa um pouco mais que um (US$ 0,170 contra US$ 0,160), mas termina antes.
 
-### Com premissas piores
+### Com outras premissas
 
-| Caso | Base (C=60 mil, K=20, S=92 mil) | Sem releitura posterior (K=0) | Pessimista (C=20 mil, K=0, S=120 mil) |
-|---|---|---|---|
-| 5 títulos de anúncio | -197% | -194% | -1118% |
-| 60 variações de anúncio, com checagem de tamanho | +29% | +32% | -99% |
-| Métricas de 3 contas de anúncio | +79% | +69% | +32% |
-| Pesquisa web lendo 8 páginas, 1 subagente | +81% | +72% | +51% |
-| Pesquisa web lendo 8 páginas, 2 subagentes | +80% | +71% | +34% |
-| Ler 12 arquivos de código e responder | +78% | +70% | +42% |
-| Implementar módulo com teste (Sonnet) | -10% | -31% | -85% |
+| Caso | Base (C=60 mil, K=20, S=92 mil) | Sem releitura posterior (K=0) | Pessimista (C=20 mil, K=0, S=120 mil) | Claude Code, general-purpose (S=55 mil) | Claude Code, executor-haiku (S=8 mil) |
+|---|---|---|---|---|---|
+| 5 títulos de anúncio | -197% | -194% | -1118% | -169% | -133% |
+| 60 variações de anúncio, com checagem de tamanho | +29% | +32% | -99% | +34% | +42% |
+| Métricas de 3 contas de anúncio | +79% | +69% | +32% | +89% | +91% |
+| Pesquisa web lendo 8 páginas, 1 subagente | +81% | +72% | +51% | +89% | +94% |
+| Pesquisa web lendo 8 páginas, 2 subagentes | +80% | +71% | +34% | +90% | +92% |
+| Ler 12 arquivos de código e responder | +78% | +70% | +42% | +89% | +93% |
+| Implementar módulo com teste (Sonnet) | -10% | -31% | -85% | +15% | não se aplica |
 
 O caso pessimista junta um principal leve (relê só 20 mil tokens por turno), sessão que acaba logo depois da tarefa e subagente que parte de 120 mil tokens. Mesmo assim a leitura pesada economiza de 32% a 51%. Lote de texto e código com Sonnet passam a custar mais que fazer direto.
+
+As duas últimas colunas usam as partidas medidas no Claude Code. Com o `executor-haiku`, a leitura pesada economiza de 91% a 94%, porque o subagente parte de 8 mil tokens, fica abaixo do limite de 100 mil e cada rodada relê pouco. O executor é um agente Haiku; para código com Sonnet seria preciso um agente enxuto equivalente, por isso a célula fica sem valor.
 
 ### A partir de quanto material delegar compensa
 
 Volume mínimo de material para delegar a um Haiku sair mais barato que o principal ler sozinho:
 
-| Chamadas de ferramenta | Base | Sem releitura posterior (K=0) | Pessimista |
-|---|---|---|---|
-| 1 | 3 mil tokens | 5 mil tokens | 21 mil tokens |
-| 2 | 2 mil tokens | 2 mil tokens | 21 mil tokens |
-| 3 | já compensa | já compensa | 20 mil tokens |
-| 8 | já compensa | já compensa | 19 mil tokens |
+| Chamadas de ferramenta | Base | Sem releitura posterior (K=0) | Pessimista | Claude Code, general-purpose | Claude Code, executor-haiku |
+|---|---|---|---|---|---|
+| 1 | 3 mil tokens | 5 mil tokens | 21 mil tokens | 2 mil tokens | 2 mil tokens |
+| 2 | 2 mil tokens | 2 mil tokens | 21 mil tokens | 1 mil tokens | já compensa |
+| 3 | já compensa | já compensa | 20 mil tokens | já compensa | já compensa |
+| 8 | já compensa | já compensa | 19 mil tokens | já compensa | já compensa |
 
-Com as premissas base, a partir de 3 chamadas de ferramenta delegar já sai mais barato mesmo com pouco material, porque cada turno do principal relê 60 mil tokens. No caso pessimista o ponto de virada fica perto de 20 mil tokens. A skill usa esses números no degrau 2 da escada: abaixo de ~5 mil tokens de material, ou ~20 mil num ambiente leve, o principal faz direto.
+Com as premissas base, a partir de 3 chamadas de ferramenta delegar já sai mais barato mesmo com pouco material, porque cada turno do principal relê 60 mil tokens. No caso pessimista o ponto de virada fica perto de 20 mil tokens. Com o `executor-haiku`, duas chamadas já bastam. A skill usa esses números no degrau 2 da escada: abaixo de ~5 mil tokens de material, ou ~20 mil num ambiente leve, o principal faz direto.
 
 ### Quanto custa errar
 

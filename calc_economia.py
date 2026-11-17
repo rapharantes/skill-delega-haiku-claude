@@ -128,6 +128,8 @@ VARIANTES = {
     "Base (C=60 mil, K=20, S=92 mil)": {},
     "Sem permanencia (K=0)": {"K": 0},
     "Pessimista (C=20 mil, K=0, S=120 mil)": {"C": 20_000, "K": 0, "S": 120_000},
+    "Claude Code, general-purpose (S=55 mil)": {"S": 55_000},  # medido no Windows, 5 servidores MCP
+    "Claude Code, executor-haiku (S=8 mil)": {"S": 8_000},  # agente enxuto da skill, mesmo ambiente
 }
 
 
