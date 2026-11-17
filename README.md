@@ -10,12 +10,14 @@ Usa Codex, Cursor, Antigravity ou Gemini CLI? A versão para essas ferramentas �
 
 A skill entra quando você pede para delegar a subagentes, usar multiagentes ou poupar tokens com eles. Antes de delegar, o principal passa por uma escada e para no primeiro degrau que resolve:
 
-1. Trabalho determinístico (cruzar listas, somar, filtrar, converter formato) vira script. Não gasta token lendo dado e não erra conta.
+1. Trabalho determinístico (cruzar listas, somar, filtrar, converter formato) vira script. Não gasta token lendo dado e não erra conta. Rotina que se repete reaproveita o script da vez anterior.
 2. Tarefa pequena, sem ferramenta ou com pouco material, o principal faz direto.
 3. Decisão, conversa com você e qualquer ação irreversível ficam com o principal.
 4. Só o volume vai para subagentes: muito material para ler, ou blocos independentes que podem rodar ao mesmo tempo.
 
-O Haiku extrai dados, lê e resume arquivos, pesquisa na web, checa contra checklist e escreve variações de texto em lote. O Sonnet entra em código com especificação e teste quando há volume, e nas tarefas em que o Haiku errou mesmo depois de corrigido. O principal (Opus ou maior) planeja, revisa e integra.
+O Haiku extrai dados, lê e resume arquivos, pesquisa na web, checa contra checklist e escreve variações de texto em lote. O Sonnet entra em código com especificação e teste quando há volume, e nas tarefas em que o Haiku errou mesmo depois de corrigido. O principal (Opus ou maior) planeja, revisa e integra. Em extração, leitura e pesquisa com o Haiku 5.5, o subagente roda com esforço baixo.
+
+Quando uma skill instalada muda o resultado de uma subtarefa (`xlsx` para planilha, por exemplo), o principal manda o subagente carregá-la antes de começar. É no máximo uma por subagente, porque a skill entra inteira no contexto dele. Numa checagem, o checklist da própria skill substitui o que o principal teria de escrever no briefing. Skills que delegam ou que montam o entregável final ficam com o principal.
 
 O principal é o gerente. Cada entrega passa por uma checagem barata, sem reler o material: formato, totais, uma ou duas citações conferidas e, em código, o teste rodado e o diff lido. Depois recebe um veredito:
 
@@ -52,6 +54,8 @@ Para receber as atualizações, rode `/plugin marketplace update rapharantes` ou
 No app Claude (claude.ai): baixe o `delegar-haiku.zip` deste repositório, abra Customize > Skills, clique em "+", depois em "Create skill" > "Upload a skill", e envie o zip. A execução de código precisa estar ligada ("Code execution and file creation", ou "Create and edit files" no layout novo, em Settings > Capabilities). Passo a passo oficial: [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
 
 No Claude Code sem plugin: copie a pasta `delegar-haiku/` para `~/.claude/skills/` (vale para todos os seus projetos) ou para `.claude/skills/` dentro de um projeto. Documentação: [Extend Claude with skills](https://code.claude.com/docs/en/skills).
+
+Opcional, no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/executor-haiku.md`. O arquivo está na seção "No Claude Code: agente enxuto" da skill. Ele fixa modelo e esforço, parte sem o CLAUDE.md, tem teto de turnos e uma lista fechada de ferramentas, que deixa de fora as ferramentas de escrita dos MCPs.
 
 A skill depende da ferramenta de subagentes (Agent) com escolha de modelo. Onde ela não existe, não há como delegar e o principal faz tudo direto.
 
