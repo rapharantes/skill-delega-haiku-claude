@@ -1,0 +1,33 @@
+name: Avaliação
+description: Dê uma nota de 1 a 5 para a skill e conte como foi usar
+title: "Avaliação: "
+labels: ["avaliação"]
+body:
+  - type: dropdown
+    id: nota
+    attributes:
+      label: Nota
+      options:
+        - "5 - Excelente"
+        - "4 - Boa"
+        - "3 - Razoável"
+        - "2 - Fraca"
+        - "1 - Ruim"
+    validations:
+      required: true
+  - type: dropdown
+    id: onde
+    attributes:
+      label: Onde você usa
+      options:
+        - Claude Code (plugin)
+        - Claude Code (pasta copiada)
+        - App Claude (zip)
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: comentario
+    attributes:
+      label: Comentário
+      description: O que funcionou, o que faltou e, se mediu, quanto economizou.

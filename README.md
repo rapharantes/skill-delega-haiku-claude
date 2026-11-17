@@ -1,5 +1,7 @@
 # skill-delega-haiku-claude
 
+[![Estrelas](https://img.shields.io/github/stars/rapharantes/skill-delega-haiku-claude?style=flat)](https://github.com/rapharantes/skill-delega-haiku-claude/stargazers) [![Versão](https://img.shields.io/github/v/release/rapharantes/skill-delega-haiku-claude)](https://github.com/rapharantes/skill-delega-haiku-claude/releases)
+
 `delegar-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
 
 No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório, calibrado com a partida medida de um subagente, estima 79% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. No Claude Code, com o agente enxuto `executor-haiku`, a estimativa sobe para 91%. Em tarefa pequena, como escrever 5 títulos, delegar sai 3 vezes mais caro, e a skill manda o principal fazer direto.
@@ -51,7 +53,7 @@ Em versões mais antigas, são dois comandos:
 /plugin install delegar-haiku@rapharantes
 ```
 
-Para receber as atualizações, rode `/plugin marketplace update rapharantes` ou ligue a atualização automática em `/plugin` > Marketplaces > rapharantes > Enable auto-update.
+Para receber as versões novas, veja [Atualizações](#atualizações).
 
 No app Claude (claude.ai): baixe o `delegar-haiku.zip` deste repositório, abra Customize > Skills, clique em "+", depois em "Create skill" > "Upload a skill", e envie o zip. A execução de código precisa estar ligada ("Code execution and file creation", ou "Create and edit files" no layout novo, em Settings > Capabilities). Passo a passo oficial: [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
 
@@ -62,6 +64,15 @@ Recomendado no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/
 A skill depende da ferramenta de subagentes (Agent) com escolha de modelo. Onde ela não existe, não há como delegar e o principal faz tudo direto.
 
 Para usar, peça em linguagem normal: "delegue isso a subagentes", "use multiagentes nessa análise". No Claude Code também dá para chamar com `/delegar-haiku:delegar-haiku`, se instalou como plugin, ou com `/delegar-haiku`, se copiou a pasta.
+
+## Atualizações
+
+Não há como avisar automaticamente quem baixou a skill: o GitHub não informa quem clonou o repositório. Cada forma de instalação recebe as versões novas de um jeito:
+
+- **Plugin do Claude Code:** o plugin acompanha os commits deste repositório. Ligue a atualização automática em `/plugin` > Marketplaces > rapharantes > Enable auto-update, ou rode `/plugin marketplace update rapharantes` quando quiser.
+- **App Claude (zip) ou pasta copiada:** não há atualização automática. Para ser avisado por e-mail a cada versão nova, clique em **Watch** > **Custom** > **Releases** no topo desta página. Depois, baixe o zip da [release mais recente](https://github.com/rapharantes/skill-delega-haiku-claude/releases/latest) e envie em Customize > Skills; se o app recusar por já existir uma skill com o mesmo nome, apague a antiga antes.
+
+O que mudou em cada versão fica nas [releases](https://github.com/rapharantes/skill-delega-haiku-claude/releases). A versão instalada aparece na última linha do `SKILL.md`.
 
 ## Quanto ela economiza
 
@@ -168,6 +179,11 @@ Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releit
 - `delegar-haiku.zip`: a mesma pasta compactada, pronta para enviar no app.
 - `.claude-plugin/marketplace.json`: o catálogo que permite instalar a skill como plugin do Claude Code.
 - `calc_economia.py`: o modelo de custo, só com a biblioteca padrão do Python.
+- `.github/ISSUE_TEMPLATE/avaliacao.yml`: o formulário de avaliação.
+
+## Avaliação
+
+Se a skill te ajudou, deixe uma estrela no topo desta página. Para dar uma nota de 1 a 5 e contar como foi usar, preencha a [avaliação](https://github.com/rapharantes/skill-delega-haiku-claude/issues/new?template=avaliacao.yml). Para relatar um problema ou sugerir melhoria, [abra uma issue](https://github.com/rapharantes/skill-delega-haiku-claude/issues/new).
 
 ## Licença
 

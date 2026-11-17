@@ -178,3 +178,5 @@ Só vale em lote: dezenas de variações, ou vários grupos de anúncio ou clien
 - **Fora do escopo:** Não inventar preço, desconto, prazo, garantia, número, depoimento ou resultado. Não escrever texto jurídico. Não publicar nem subir nada em plataforma.
 - **Formato de retorno:** Lista numerada de [N] variações. Cada item: [ângulo, até 2 palavras] + texto. Última linha: "Limites conferidos por script". Sem comentário antes ou depois.
 - **Se travar:** Responder "BLOQUEADO: motivo" se faltar oferta ou público. Dado que a copy exige e não veio nas entradas (ex.: preço) entra como [não encontrado], nunca inventado.
+
+<!-- delegar-haiku v1.1.0 · 17/11/2026 · https://github.com/rapharantes/skill-delega-haiku-claude/releases -->
