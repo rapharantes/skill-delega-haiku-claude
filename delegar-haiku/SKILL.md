@@ -62,7 +62,7 @@ Uma skill instalada pode dar ao subagente o método que o principal teria de esc
 
 O principal não aceita entrega no escuro, mas também não refaz o trabalho.
 
-**Checagem barata, sem reler o material:** formato respeitado; contagens, totais e limites de caracteres batem (por script, quando há arquivo); uma ou duas localizações citadas abertas por amostragem; nenhum BLOQUEADO ou [não encontrado] sem tratamento; nada fora do escopo. Em código: rodar a verificação e ler só o diff.
+**Checagem barata, sem reler o material:** formato respeitado; contagens, totais e limites de caracteres batem (por script, quando há arquivo); uma ou duas localizações citadas abertas por amostragem; nenhum BLOQUEADO ou [não encontrado] sem tratamento; nada fora do escopo. Em código, nesta ordem: primeiro se cumpre a especificação (a verificação passa e o diff faz o que foi pedido, nem mais nem menos); só depois a qualidade do diff. A ordem vem da skill subagent-driven-development, de obra/superpowers.
 
 **Veredito:**
 - **ACEITO:** integra.
@@ -121,7 +121,7 @@ Com `tools` fechado, as ferramentas de MCP ficam de fora, inclusive as de escrit
 
 ## Modelos de briefing
 
-Todo briefing tem os mesmos seis campos, nesta ordem. Placeholders entre colchetes. Quando houver skill para a subtarefa, a linha **Skill:** [nome exato] vem antes do Objetivo.
+Todo briefing abre com a linha `Tarefa delegada pela sessão principal:` e tem os mesmos seis campos, nesta ordem. Placeholders entre colchetes. Sem essa linha, num ambiente com memória do usuário, um Haiku leu o briefing como parte da memória e recusou a tarefa. Quando houver skill para a subtarefa, a linha **Skill:** [nome exato] vem antes do Objetivo.
 
 ### 1. Extração de dados de conta de anúncio (Haiku)
 
@@ -179,4 +179,4 @@ Só vale em lote: dezenas de variações, ou vários grupos de anúncio ou clien
 - **Formato de retorno:** Lista numerada de [N] variações. Cada item: [ângulo, até 2 palavras] + texto. Última linha: "Limites conferidos por script". Sem comentário antes ou depois.
 - **Se travar:** Responder "BLOQUEADO: motivo" se faltar oferta ou público. Dado que a copy exige e não veio nas entradas (ex.: preço) entra como [não encontrado], nunca inventado.
 
-<!-- delegar-haiku v1.1.0 · 17/11/2026 · https://github.com/rapharantes/skill-delega-haiku-claude/releases -->
+Skill criada por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes/skill-delega-haiku-claude) · v1.2.0 (17/11/2026)
