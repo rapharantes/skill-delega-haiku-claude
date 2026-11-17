@@ -1,6 +1,7 @@
 // Benchmark da skill delegar-haiku: as mesmas tarefas, com gabarito, sem e com a skill.
 //   node bench.js preparar               clona o repositorio de teste, gera planilhas e gabarito
 //   node bench.js rodar [t modo rep]     roda as 16 execucoes (ou um caso) e grava resultados-v2.jsonl
+//   node bench.js rodar rep 1            roda so a repeticao 1 (8 execucoes)
 //   node bench.js resumo                 tabela por tarefa e modo
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
 const W = __dirname;                                       // pasta de trabalho dos runs
@@ -176,6 +177,7 @@ function rodarUm(t, modo, rep) {
     erro: out.is_error ? String(out.result).slice(0, 200) : null };
   fs.appendFileSync(RES, JSON.stringify(linha) + '\n');
   console.log(JSON.stringify(linha));
+  if (out.is_error && /limit/i.test(String(out.result))) { console.log('Parando: limite de uso do plano atingido.'); process.exit(2); }
 }
 
 function resumo() {
@@ -195,7 +197,8 @@ function resumo() {
 const [cmd, t, modo, rep] = process.argv.slice(2);
 if (cmd === 'preparar') preparar();
 else if (cmd === 'rodar') {
-  if (t) rodarUm(+t, modo, +(rep || 0));
+  if (t === 'rep') for (const tt of LISTA) for (const m of +modo === 1 ? ['A', 'B'] : ['B', 'A']) rodarUm(tt, m, +modo);
+  else if (t) rodarUm(+t, modo, +(rep || 0));
   else for (const r of [1, 2]) for (const tt of LISTA) for (const m of r === 1 ? ['A', 'B'] : ['B', 'A']) rodarUm(tt, m, r);
 } else if (cmd === 'resumo') resumo();
 else console.log('uso: node bench.js preparar | rodar [t modo rep] | resumo');
