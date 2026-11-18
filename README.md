@@ -4,7 +4,7 @@
 
 `delegar-haiku` é uma skill para o Claude dividir tarefas grandes entre subagentes menores (Haiku e Sonnet) rodando em paralelo. O modelo principal planeja, revisa cada entrega, devolve para correção quando discorda e monta o resultado final.
 
-No caso de puxar métricas de 3 contas de anúncio, o modelo de custo deste repositório, calibrado com a partida medida de um subagente, estima 79% menos custo e 40% menos turnos em série do que o principal fazendo tudo sozinho. No Claude Code, com o agente enxuto `executor-haiku`, a estimativa sobe para 91%. Em tarefa pequena, como escrever 5 títulos, delegar sai 3 vezes mais caro, e a skill manda o principal fazer direto.
+O modelo de custo deste repositório estima até 79% menos custo quando o principal teria de ler muito material, como métricas de várias contas de anúncio, e 91% com o agente enxuto `executor-haiku`. O teste real mostrou outra coisa: no Claude Code com Opus, nas tarefas testadas, o Claude Code sozinho já resolveu barato, com scripts, buscas no texto e os próprios subagentes, e a skill empatou ou custou um pouco mais. Os números estão em [Teste real](#teste-real).
 
 Usa Codex, Cursor, Antigravity ou Gemini CLI? A versão para essas ferramentas é a [delegar-subagentes](https://github.com/rapharantes/delegar-subagentes).
 
@@ -19,7 +19,7 @@ A skill entra quando você pede para delegar a subagentes, usar multiagentes ou 
 
 O Haiku extrai dados, lê e resume arquivos, pesquisa na web, checa contra checklist e escreve variações de texto em lote. O Sonnet entra em código com especificação e teste quando há volume, e nas tarefas em que o Haiku errou mesmo depois de corrigido. O principal (Opus ou maior) planeja, revisa e integra. Em extração, leitura e pesquisa com o Haiku 5.5, o subagente roda com esforço baixo.
 
-Para gastar menos, o briefing limita rodadas, porque cada rodada relê o contexto inteiro do subagente, e leitura de arquivos locais vai para o Explore, que parte mais leve. Quando o principal tem trabalho próprio, subagentes do mesmo tipo saem escalonados para reaproveitar o cache da partida.
+O `SKILL.md` tem só a decisão de delegar ou não. Os modelos de briefing (`briefings.md`) e as medições (`referencia.md`) só são abertos quando a skill de fato delega. Para gastar menos, o briefing limita rodadas, porque cada rodada relê o contexto inteiro do subagente, e leitura de arquivos locais vai para o Explore, que parte mais leve. Quando o principal tem trabalho próprio, subagentes do mesmo tipo saem escalonados para reaproveitar o cache da partida.
 
 Quando uma skill instalada muda o resultado de uma subtarefa (`xlsx` para planilha, por exemplo), o principal manda o subagente carregá-la antes de começar. É no máximo uma por subagente, porque a skill entra inteira no contexto dele. Numa checagem, o checklist da própria skill substitui o que o principal teria de escrever no briefing. Skills que delegam ou que montam o entregável final ficam com o principal.
 
@@ -34,7 +34,7 @@ O principal é o gerente. Cada entrega passa por uma checagem barata, sem reler 
 
 O limite de uma rodada de correção existe porque o vai e volta sem fim come a economia. Os números estão mais abaixo.
 
-A skill traz seis modelos de briefing com os mesmos campos (objetivo, entradas, critérios, fora do escopo, formato de retorno, o que fazer se travar): extração de dados de conta de anúncio, leitura e resumo de arquivos, pesquisa web, checagem contra checklist, implementação de código e variações de texto em lote. Todo briefing fixa um teto de chamadas de ferramenta e um formato de retorno fechado.
+A skill traz seis modelos de briefing com os mesmos campos (objetivo, entradas, critérios, fora do escopo, formato de retorno, o que fazer se travar): extração de dados de conta de anúncio, leitura e resumo de arquivos, pesquisa web, checagem contra checklist, implementação de código e variações de texto em lote. Todo briefing fixa um teto de rodadas e um formato de retorno fechado.
 
 Subagente nunca executa ação irreversível: alterar campanha, enviar mensagem, publicar, apagar, fazer push ou deploy. Isso fica com o principal e só acontece com a sua confirmação.
 
@@ -74,9 +74,44 @@ Não há como avisar automaticamente quem baixou a skill: o GitHub não informa 
 
 O que mudou em cada versão fica nas [releases](https://github.com/rapharantes/skill-delega-haiku-claude/releases). A versão instalada aparece na última linha do `SKILL.md`.
 
+## Teste real
+
+O `bench/bench.js` roda as mesmas tarefas, com gabarito, sem e com a skill, no Claude Code com o Opus como principal, e mede nota, custo, tokens, tempo e se a skill delegou. O custo calculado pelas transcrições bateu com o que o próprio Claude Code informa.
+
+**v1.2.0 (17/11/2026, 2 repetições).** Nota máxima nos dois modos, em tudo. Custo médio por execução:
+
+| Tarefa | Sem skill | Com skill | Diferença |
+|---|---|---|---|
+| Pesquisa na documentação | US$ 0,45 | US$ 0,76 | +70% |
+| Leitura de código (`requests`) | US$ 0,40 | US$ 0,59 | +47% |
+| Cruzar duas planilhas de 2 mil leads | US$ 0,37 | US$ 0,55 | +51% |
+| 5 títulos de anúncio | US$ 0,35 | US$ 0,51 | +45% |
+
+Carregar a skill gravava uns 9 mil tokens a mais no cache do Opus, mesmo quando ela decidia não delegar, e na pesquisa o principal fez 8 requisições contra 3. Nessa rodada, o modo sem skill também ficou sem a lista de skills instaladas, o que aumentou um pouco a diferença.
+
+**v2.0.0 (18/11/2026, 1 repetição).** O `SKILL.md` encolheu de cerca de 3.300 para 714 palavras, e o modo sem skill passou a ter a lista de skills, como no uso normal. A tarefa das planilhas deu lugar a uma pesada: 10 atas de reunião com cerca de 66 mil palavras, em que o orçamento e o responsável finais aparecem depois de valores e nomes descartados.
+
+| Tarefa | Sem skill | Com skill | Diferença |
+|---|---|---|---|
+| Pesquisa na documentação | US$ 0,64 | US$ 0,74 | +16% |
+| Leitura de código (`requests`) | US$ 0,53 | US$ 0,58 | +9% |
+| 5 títulos de anúncio | US$ 0,50 | US$ 0,51 | +1% |
+| 10 atas longas | US$ 0,61 | US$ 0,57 | −7% |
+
+Nota máxima nos dois modos, em tudo. Na pesquisa, o `executor-haiku` gastou 114 mil tokens, contra 181 mil dos subagentes que o Claude Code abre sozinho, mas os passos extras do principal custaram mais que essa diferença.
+
+O que isso quer dizer:
+
+- A v2 resolveu o custo de carregar a skill: quando ela decide não delegar, quase não custa nada a mais.
+- Ela ainda não mostrou economia no Claude Code com Opus. Nas atas longas, o Opus sozinho acertou tudo por US$ 0,61, provavelmente buscando os valores em vez de ler tudo. A economia que o modelo de custo prevê depende de o principal precisar ler muito material, e nesses testes ele contornou isso sozinho.
+- O custo varia de uma execução para outra: a mesma pesquisa sem skill custou US$ 0,45 na primeira rodada e US$ 0,64 na segunda. Com uma repetição, diferenças abaixo de uns 15% estão dentro dessa variação.
+- Ficaram de fora casos em que o material não pode ser filtrado por script antes de entrar no contexto do principal, como respostas grandes de conectores (contas de anúncio, CRM), e o app Claude, onde o subagente parte de 92 mil tokens.
+
+Para repetir: copie `bench/bench.js` para uma pasta vazia e rode `node bench.js preparar`, depois `node bench.js rodar rep 1` e `node bench.js resumo`. Cada execução gasta da sua cota do plano, como uma conversa curta de trabalho.
+
 ## Quanto ela economiza
 
-Isto é um modelo de custo, não um benchmark. A partida do subagente vem de medição; o resto sai do `calc_economia.py`, que usa os preços oficiais da API consultados em 31/10/2026 e as premissas abaixo. Rode o script com os seus números.
+Isto é um modelo de custo, não um benchmark, e o teste real acima não confirmou essas economias nas tarefas testadas. A partida do subagente vem de medição; o resto sai do `calc_economia.py`, que usa os preços oficiais da API consultados em 31/10/2026 e as premissas abaixo. Rode o script com os seus números.
 
 ### O que foi medido
 
@@ -175,7 +210,10 @@ Edite `PREMISSAS` (contexto do principal, partida do subagente, turnos de releit
 
 ## Arquivos
 
-- `delegar-haiku/SKILL.md`: a skill.
+- `delegar-haiku/SKILL.md`: a skill, só com a decisão de delegar ou não.
+- `delegar-haiku/briefings.md`: os modelos de briefing, abertos quando a skill delega.
+- `delegar-haiku/referencia.md`: medições, agente enxuto e otimizações.
+- `bench/bench.js`: o teste real, com gabarito.
 - `delegar-haiku.zip`: a mesma pasta compactada, pronta para enviar no app.
 - `.claude-plugin/marketplace.json`: o catálogo que permite instalar a skill como plugin do Claude Code.
 - `calc_economia.py`: o modelo de custo, só com a biblioteca padrão do Python.

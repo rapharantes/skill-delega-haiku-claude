@@ -21,6 +21,10 @@ Em preço de API (out/2026), o token de entrada do Haiku 5.5 custa 1/40 do Opus 
 
 Quatro tarefas com gabarito (pesquisa na documentação, leitura de código, cruzamento de planilhas e uma tarefa pequena), sem e com a skill, duas vezes cada, no Claude Code com o Opus como principal. A nota foi máxima nos dois modos. Com a skill (v1.2.0), o custo subiu de 45% a 70%: carregar a skill gravava uns 9 mil tokens a mais no cache do Opus, mesmo quando ela decidia não delegar, e na pesquisa o principal fez 8 requisições contra 3. Por isso a v2 deixa no SKILL.md só a decisão e manda abrir os outros arquivos apenas quando for delegar.
 
+## Segundo benchmark (v2, nov/2026)
+
+Uma repetição, com a lista de skills também no modo sem skill e uma tarefa pesada (10 atas longas). Diferença de custo com a skill: pesquisa +16%, leitura de código +9%, tarefa pequena +1%, atas −7%, todas com nota máxima. A skill quase não custa mais quando decide não delegar, mas ainda não mostrou economia no Claude Code com Opus, que resolve essas tarefas com scripts, buscas e os próprios subagentes. Diferenças abaixo de uns 15% estão dentro da variação entre execuções.
+
 ## No Claude Code: agente enxuto
 
 Os tipos prontos herdam todas as ferramentas e carregam o CLAUDE.md. Um agente definido em `~/.claude/agents/executor-haiku.md` fixa modelo e esforço, tira o CLAUDE.md da partida, impõe teto de turnos e fecha a lista de ferramentas:
