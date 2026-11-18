@@ -74,4 +74,4 @@ Retorno: mesmo formato, só os itens alterados.
 
 O mesmo tipo de erro em execuções diferentes indica defeito no modelo de briefing: ajuste o modelo nesta skill.
 
-Skill criada por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes/skill-delega-haiku-claude) · v2.0.0 (17/11/2026)
+Skill criada por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes/skill-delega-haiku-claude) · v2.0.1 (18/11/2026)

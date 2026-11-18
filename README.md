@@ -59,7 +59,7 @@ No app Claude (claude.ai): baixe o `delegar-haiku.zip` deste repositório, abra 
 
 No Claude Code sem plugin: copie a pasta `delegar-haiku/` para `~/.claude/skills/` (vale para todos os seus projetos) ou para `.claude/skills/` dentro de um projeto. Documentação: [Extend Claude with skills](https://code.claude.com/docs/en/skills).
 
-Recomendado no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/executor-haiku.md`. O arquivo está na seção "No Claude Code: agente enxuto" da skill. Ele fixa modelo e esforço, parte sem o CLAUDE.md, tem teto de turnos e uma lista fechada de ferramentas, que deixa de fora as ferramentas de escrita dos MCPs. Na medição, partiu de 8 mil tokens, contra 55 mil do general-purpose. Subtarefa que precisa de skill ou de conector vai para o general-purpose, a menos que você acrescente essas ferramentas ao executor.
+Recomendado no Claude Code: crie o agente `executor-haiku` em `~/.claude/agents/executor-haiku.md`. O arquivo está na seção "No Claude Code: agente enxuto" da skill. Ele fixa modelo e esforço, parte sem o CLAUDE.md, tem teto de turnos e uma lista fechada de ferramentas, que deixa de fora as ferramentas de escrita dos MCPs. Na medição, partiu de 8 mil tokens, contra 55 mil do general-purpose. A descrição dele é genérica de propósito: o Claude Code também pode escolhê-lo sozinho, sem a skill. No teste real, numa pesquisa, ele gastou 114 mil tokens, contra 181 mil dos subagentes que o Claude Code abre por conta própria. Subtarefa que precisa de skill ou de conector vai para o general-purpose, a menos que você acrescente essas ferramentas ao executor.
 
 A skill depende da ferramenta de subagentes (Agent) com escolha de modelo. Onde ela não existe, não há como delegar e o principal faz tudo direto.
 

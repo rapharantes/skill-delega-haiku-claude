@@ -32,7 +32,7 @@ Os tipos prontos herdam todas as ferramentas e carregam o CLAUDE.md. Um agente d
 ```markdown
 ---
 name: executor-haiku
-description: Executa subtarefas de leitura, extração e pesquisa delegadas pela skill delegar-haiku.
+description: Use para leitura, extração e pesquisa volumosas que não precisam de skill nem de conector. Devolve só o formato pedido.
 model: haiku
 effort: low
 maxTurns: 6
@@ -42,7 +42,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 Execute só o briefing recebido e devolva no formato pedido. Não altere arquivos de projeto, contas nem configurações.
 ```
 
-Com `tools` fechado, as ferramentas de MCP ficam de fora, inclusive as de escrita. Para extrair dados de anúncio, acrescente só os nomes exatos das ferramentas de leitura e, em `mcpServers`, só o servidor delas. No Claude Code, ele partiu de 8 mil tokens, contra 55 mil do general-purpose. Sem a ferramenta Skill, ele não carrega skills: para isso, acrescente `Skill` ao `tools` ou use o general-purpose. Para medir a partida no seu ambiente, delegue uma tarefa sem ferramenta ("responda ok"): a contagem ao fim é a partida. O Bash continua podendo gravar arquivo, o que serve ao retorno em arquivo. `effort: low` vale para o Haiku 5.5; `omitClaudeMd` exige Claude Code v2.1.271 ou mais recente.
+Com `tools` fechado, as ferramentas de MCP ficam de fora, inclusive as de escrita. Para extrair dados de anúncio, acrescente só os nomes exatos das ferramentas de leitura e, em `mcpServers`, só o servidor delas. No Claude Code, ele partiu de 8 mil tokens, contra 55 mil do general-purpose. Com essa descrição genérica, o Claude Code também pode escolhê-lo sozinho, sem a skill. Sem a ferramenta Skill, ele não carrega skills: para isso, acrescente `Skill` ao `tools` ou use o general-purpose. Para medir a partida no seu ambiente, delegue uma tarefa sem ferramenta ("responda ok"): a contagem ao fim é a partida. O Bash continua podendo gravar arquivo, o que serve ao retorno em arquivo. `effort: low` vale para o Haiku 5.5; `omitClaudeMd` exige Claude Code v2.1.271 ou mais recente.
 
 ## Escalonar subagentes do mesmo tipo
 
@@ -58,4 +58,4 @@ Partir um bloco em dois soma uma partida e as releituras dela a cada rodada, e c
 - Os tipos prontos de subagente não bloqueiam as ferramentas de escrita dos MCPs, nem o Explore, que também tem Bash. A proteção é o briefing e a escolha do que delegar: não delegue tarefa cujo caminho natural passe por ferramenta de escrita. No Claude Code, o agente enxuto com `tools` fechado bloqueia de fato.
 - Não coloque chaves, tokens ou senhas no briefing.
 
-Skill criada por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes/skill-delega-haiku-claude) · v2.0.0 (17/11/2026)
+Skill criada por Raphael Arantes · [LinkedIn](https://www.linkedin.com/in/raphael-arantes/) · [GitHub](https://github.com/rapharantes/skill-delega-haiku-claude) · v2.0.1 (18/11/2026)
